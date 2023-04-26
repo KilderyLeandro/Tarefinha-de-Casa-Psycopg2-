@@ -1,0 +1,103 @@
+import psycopg2
+
+# Função para listar todos os livros da biblioteca
+def listar_livros(cur):
+    cur.execute("""
+        SELECT Livro_id, Livro_nome, Livro_paginas, Livro_anoLancamento, Autor_nome
+        FROM Livros
+        JOIN Autores ON Livros.Livro_autor = Autores.Autor_id;
+    """)
+    
+    for livro_id, livro_nome, livro_paginas, livro_ano, autor_nome in cur.fetchall():
+        print(f"{livro_id} - {livro_nome} ({livro_paginas} páginas, publicado em {livro_ano}) - Autor: {autor_nome}")
+
+# Função para listar todos os autores da biblioteca
+def listar_autores(cur):
+    cur.execute("""
+        SELECT Autor_id, Autor_nome
+        FROM Autores;
+    """)
+    
+    for autor_id, autor_nome in cur.fetchall():
+        print(f"{autor_id} - {autor_nome}")
+
+# Conexão com o banco de dados
+conn = psycopg2.connect(
+    host="localhost",
+    database="Biblioteca",
+    user="postgres",
+    password="postgre"
+)
+
+# Menu de opções para o usuário
+while True:
+    print("---- MENU ----")
+    print("1 - Adicionar livro")
+    print("2 - Remover livro")
+    print("3 - Listar livros")
+    print("4 - Adicionar autor")
+    print("5 - Remover autor")
+    print("6 - Listar autores")
+    print("0 - Sair")
+    opcao = input("Escolha uma opção: ")
+
+    with conn.cursor() as cur:
+        # Adicionar livro
+        if opcao == "1":
+            livro_nome = input("Digite o nome do livro: ")
+            livro_paginas = int(input("Digite o número de páginas: "))
+            livro_ano = int(input("Digite o ano de lançamento: "))
+            listar_autores(cur)
+            livro_autor = int(input("Digite o ID do autor: "))
+            cur.execute("""
+                INSERT INTO Livros (Livro_nome, Livro_paginas, Livro_anoLancamento, Livro_autor) 
+                VALUES (%s, %s, %s, %s);
+            """, (livro_nome, livro_paginas, livro_ano, livro_autor))
+            conn.commit()
+            print("Livro adicionado com sucesso!")
+        
+        # Remover livro
+        elif opcao == "2":
+            listar_livros(cur)
+            livro_id = int(input("Digite o ID do livro que deseja remover: "))
+            cur.execute("""
+                DELETE FROM Livros WHERE Livro_id = %s;
+            """, (livro_id,))
+            conn.commit()
+            print("Livro removido com sucesso!")
+        
+        # Listar livros
+        elif opcao == "3":
+            listar_livros(cur)
+        
+        # Adicionar autor
+        elif opcao == "4":
+            autor_nome = input("Digite o nome do autor: ")
+            cur.execute("""
+                INSERT INTO Autores (Autor_nome) VALUES (%s);
+            """, (autor_nome,))
+            conn.commit()
+            print("Autor adicionado com sucesso!")
+        
+        # Remover autor
+        elif opcao == "5":
+            listar_autores(cur)
+            autor_id = int(input("Digite o ID do autor que deseja remover: "))
+            cur.execute("""
+                DELETE FROM Autores WHERE Autor_id = %s;
+            """, (autor_id,))
+            conn.commit()
+            print("Autor removido com sucesso!")
+    
+        # Listar autores
+        elif opcao == "6":
+            listar_autores(cur)
+
+        # Sair do programa
+        elif opcao == "0":
+            print("Encerrando o programa...")
+            break
+        
+        # Opção inválida
+        else:
+            print("Opção inválida, tente novamente.")
