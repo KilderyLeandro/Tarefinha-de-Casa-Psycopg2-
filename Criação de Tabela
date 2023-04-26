@@ -1,0 +1,75 @@
+import psycopg2
+
+conn = psycopg2.connect(
+    host="localhost",
+    database="Biblioteca",
+    user="postgres",
+    password="postgre"
+)
+
+with conn.cursor() as cur:
+    cur.execute("""
+        CREATE TABLE Autores (
+            Autor_id SERIAL PRIMARY KEY,
+            Autor_nome VARCHAR(100) NOT NULL
+        );
+    """)
+    
+    cur.execute("""
+        CREATE TABLE Livros (
+            Livro_id SERIAL PRIMARY KEY,
+            Livro_nome VARCHAR(100) NOT NULL,
+            Livro_paginas INTEGER NOT NULL,
+            Livro_anoLancamento INTEGER NOT NULL,
+            Livro_autor INTEGER REFERENCES Autores(Autor_id)
+        );
+    """)
+    
+    conn.commit()
+
+with conn.cursor() as cur:
+    cur.execute("""
+        CREATE TABLE Autores (
+            Autor_id SERIAL PRIMARY KEY,
+            Autor_nome VARCHAR(100) NOT NULL
+        );
+    """)
+    
+    cur.execute("""
+        CREATE TABLE Livros (
+            Livro_id SERIAL PRIMARY KEY,
+            Livro_nome VARCHAR(100) NOT NULL,
+            Livro_paginas INTEGER NOT NULL,
+            Livro_anoLancamento INTEGER NOT NULL,
+            Livro_autor INTEGER REFERENCES Autores(Autor_id)
+        );
+    """)
+    
+    conn.commit()
+
+with conn.cursor() as cur:
+    cur.execute("""
+        INSERT INTO Autores (Autor_nome) VALUES
+            ('Stephen King'),
+            ('Agatha Christie'),
+            ('J.K. Rowling');
+    """)
+    
+    cur.execute("""
+        INSERT INTO Livros (Livro_nome, Livro_paginas, Livro_anoLancamento, Livro_autor) VALUES
+            ('O Iluminado', 447, 1977, 1),
+            ('Assassinato no Expresso Oriente', 256, 1934, 2),
+            ('Harry Potter e a Pedra Filosofal', 223, 1997, 3);
+    """)
+    
+    conn.commit()
+
+with conn.cursor() as cur:
+    cur.execute("""
+        SELECT Livro_nome, Autor_nome
+        FROM Livros
+        JOIN Autores ON Livros.Livro_autor = Autores.Autor_id;
+    """)
+    
+    for livro_nome, autor_nome in cur.fetchall():
+        print(f"{livro_nome} - {autor_nome}")
