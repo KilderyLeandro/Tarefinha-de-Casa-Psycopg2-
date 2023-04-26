@@ -1,0 +1,21 @@
+import psycopg2
+
+# Conectando ao servidor PostgreSQL
+conn = psycopg2.connect(
+    host="localhost",
+    user="seu_usuario",
+    password="sua_senha"
+)
+
+# Criando um cursor para executar comandos SQL
+cur = conn.cursor()
+
+# Criando um banco de dados
+cur.execute("CREATE DATABASE biblioteca")
+
+# Fechando o cursor e confirmando as alterações
+cur.close()
+conn.commit()
+
+# Fechando a conexão
+conn.close()
